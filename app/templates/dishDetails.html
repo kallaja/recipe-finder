@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+    {% block title %}
+    <title>Dish details</title>
+    {% endblock %}
+
+    {% block content %}
+    <div class="container main-container py-3 my-3">
+        <h1>{{ dish_name }}</h1>
+        <br>
+        <div class="row">
+            {% if dish_photo: %}
+            <img class="col-xs-12 col-lg-6 pb-3" src="{{ dish_photo }}" alt="{{ dish_name }}" width="100%" height="auto">
+            {% else: %}
+            <img class="col-xs-12 col-lg-6 pb-3" src="{{ url_for('main.static', filename='images/no-image-found.png') }}" alt="{{ dish_name }}" width="100%" height="auto">
+            {% endif %}
+            <div class="col-xs-12 col-md-6">
+                <h2 class="mb-3">Ingredients</h2>
+                <ul>
+                        {% for ingredient in ingredients: %}
+                        <li>{{ ingredient }}</li>
+                        {% endfor %}
+                </ul>
+            </div>
+        </div>
+        <br><br>
+        <h2 class="mb-3">Instructions</h2>
+        <ol>
+            {% for instruction in instructions: %}
+            <li><p>{{ instruction['step'] }}</p></li>
+            {% endfor %}
+        </ol>
+    </div>
+    {% endblock %}

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+    {% block title %}
+    <title>Searching results</title>
+    {% endblock %}
+
+    {% block styles %}
+    {{ super() }}
+    <style>
+        .card { width: 18rem; }
+    </style>
+    {% endblock %}
+
+    {% block content %}
+    <div class="container main-container">
+             <div class="cards justify-content-center row row-cols-1 row-cols-md-2 row-cols-lg-3 mb-2 py-5">
+                 {% for i in range(num_cards): %}
+                 <div class="card col text-center m-2" style="width: 18rem;">
+                     {% if response_results[i]['image']: %}
+                      <img src="{{ response_results[i]['image'] }}" class="card-img-top" alt="{{ response_results[i]['title'] }}">
+                     {% else: %}
+                     <img src="{{ url_for('main.static', filename='images/no-image-found.png') }}" class="card-img-top" alt="{{ response_results[i]['title'] }}" height="183.933" width="276.4">
+                     {% endif %}
+                      <div class="card-body justify-content-center">
+                        <h5 class="card-title">{{ response_results[i]['title'] }}</h5>
+                        <a href="{{ url_for('main.details', id_num=i, unique_name=unique_name) }}" class="btn btn-outline-primary">More details</a>
+                      </div>
+                </div>
+                {% endfor %}
+             </div>
+    </div>
+    {% endblock %}

@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+    {% block title %}
+    <title>Start</title>
+    {% endblock %}
+
+    {% block styles %}
+    {{ super() }}
+    <style>
+        .col { padding: 10px 5px; }
+        .card { width: 18rem; }
+    </style>
+    {% endblock %}
+
+    {% block content %}
+    <div id="myCarousel" class="carousel slide mb-3" data-bs-ride="carousel" style="height: 450px">
+        <div class="carousel-indicators">
+            <button type="button" data-bs-target="#myCarousel" data-bs-slide-to="0" class="" aria-label="Slide 1"></button>
+            <button type="button" data-bs-target="#myCarousel" data-bs-slide-to="1" aria-label="Slide 2" class=""></button>
+            <button type="button" data-bs-target="#myCarousel" data-bs-slide-to="2" aria-label="Slide 3" class="active"
+                aria-current="true"></button>
+        </div>
+        <div class="carousel-inner">
+            <div class="carousel-item bg-img bg-img-1">
+                <svg class="bd-placeholder-img" width="100%" height="450px" xmlns="http://www.w3.org/2000/svg"
+                    aria-hidden="true" preserveAspectRatio="none" focusable="false">
+               </svg>
+                <div class="container">
+                    <div class="carousel-caption">
+                        <h1>Random recipe</h1>
+                        <h5 class="pb-3 opacity-75">Don't you know what to cook?</h5>
+                        <p><a class="btn btn-lg btn-primary" href="{{ url_for('main.random') }}">Click here</a></p>
+                    </div>
+                </div>
+            </div>
+            <div class="carousel-item bg-img bg-img-2">
+                <svg class="bd-placeholder-img" width="100%" height="450px" xmlns="http://www.w3.org/2000/svg"
+                    aria-hidden="true" preserveAspectRatio="none" focusable="false">
+                </svg>
+                <div class="container">
+                    <div class="carousel-caption">
+                        <h1>Intolerances</h1>
+                        <h5 class="pb-3 opacity-75">Look for dishes tailored to you.</h5>
+                        <p><a class="btn btn-lg btn-primary" href="{{ url_for('main.preferences', filter_type='1') }}">Click here</a></p>
+                    </div>
+                </div>
+            </div>
+            <div class="carousel-item active bg-img bg-img-3">
+                <svg class="bd-placeholder-img" width="100%" height="450px" xmlns="http://www.w3.org/2000/svg"
+                    aria-hidden="true" preserveAspectRatio="none" focusable="false">
+                </svg>
+                <div class="container">
+                    <div class="carousel-caption">
+                        <h1>Diet</h1>
+                        <h5 class="pb-3 opacity-75">Choose the type of diet that suits your preferences.</h5>
+                        <p><a class="btn btn-lg btn-primary" href="{{ url_for('main.preferences', filter_type='3') }}">Click here</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#myCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#myCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </button>
+    </div>
+
+
+    <div class="container main-container">
+             <div class="cards justify-content-center row row-cols-1 row-cols-md-2 row-cols-lg-3 mb-2 py-5">
+                 {% for i in range(12): %}
+                 <div class="card col text-center m-2">
+                     {% if response_results[i]['image']: %}
+                      <img src="{{ response_results[i]['image'] }}" class="card-img-top" alt="{{ response_results[i]['title'] }}">
+                     {% else: %}
+                     <img src="{{ url_for('main.static', filename='images/no-image-found.png') }}" class="card-img-top" alt="{{ response_results[i]['title'] }}" height="183.933" width="276.4">
+                     {% endif %}
+                      <div class="card-body justify-content-center">
+                        <h5 class="card-title">{{ response_results[i]['title'] }}</h5>
+                        <a href="{{ url_for('main.details', id_num=i, unique_name=unique_name) }}" class="btn btn-outline-primary">More details</a>
+                      </div>
+                </div>
+                {% endfor %}
+             </div>
+    </div>
+
+    {% endblock %}

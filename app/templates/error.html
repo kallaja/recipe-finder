@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+    {% block title %}
+    <title>Error</title>
+    {% endblock %}
+
+    {% block content %}
+    <div class="container main-container">
+        <h2 class="text-center p-5">No results found for "{{ searched_phrase }}".</h2>
+    </div>
+    {% endblock %}

@@ -1,0 +1,34 @@
+body {
+        background-color: #212529;
+}
+
+.main-container {
+    min-height: calc(100vh - 120px);
+    color: white;
+}
+
+hr {
+    color: lightgrey;
+    padding: 0;
+    margin: 0;
+}
+
+.bg-img {
+    width: 100%;
+    height: auto;
+    background-repeat: no-repeat;
+    background-color: pink;
+    background-size: cover;
+}
+
+.bg-img-1 {
+    background-image: url('../images/pizza.jpg');
+}
+
+.bg-img-2 {
+    background-image: url('../images/soybean.jpg');
+}
+
+.bg-img-3 {
+    background-image: url('../images/vegetables.jpg');
+}

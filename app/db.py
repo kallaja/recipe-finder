@@ -1,6 +1,5 @@
 import sqlite3
 import json
-import os
 from .config import Config
 
 db_file = Config.db_file
@@ -9,7 +8,6 @@ db_file = Config.db_file
 def init_db():
     # Connect to a .db file (or create it if it doesn't exist)
     connection = sqlite3.connect(db_file, check_same_thread=False)
-
     # Create a cursor to interact with the database
     cursor = connection.cursor()
 
@@ -84,12 +82,3 @@ def obtain_response_from_database(unique_name):
     else:
         print("No record found with that unique name.")
         return None
-
-
-def delete_db():
-    # Delete the .db file
-    if os.path.exists(db_file):
-        os.remove(db_file)
-        print(f'{db_file} has been deleted.')
-    else:
-        print(f'{db_file} does not exist.')

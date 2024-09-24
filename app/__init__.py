@@ -7,6 +7,7 @@ from .routes import main_bp
 def create_app():
     # Create the Flask app
     app = Flask(__name__)
+    app.SCM_DO_BUILD_DURING_DEPLOYMENT = 1
     Bootstrap(app)
 
     # Initialize the database

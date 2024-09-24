@@ -41,13 +41,8 @@ def webscraper(endpoint, xpath):
 
 # call function, which scrape parameters off the page
 INTOLERANCES_PARAMETERS = webscraper(endpoint=endpoint_intolerances, xpath=intolerances_xpath)
-print(INTOLERANCES_PARAMETERS)
-
 CUISINES_LIST = webscraper(endpoint=endpoint_cuisines, xpath=cuisines_xpath)
-print(CUISINES_LIST)
-
 DIETS_LIST = webscraper(endpoint=endpoint_diets, xpath=diets_xpath)
-print(DIETS_LIST)
 
 dictionary = {
     'INTOLERANCES_PARAMETERS': INTOLERANCES_PARAMETERS,

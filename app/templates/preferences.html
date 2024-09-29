@@ -8,6 +8,9 @@
     <div class="container main-container">
         <h1 class="my-3">Choose {{ filter_name }}</h1>
         <form method="POST" action="">
+            <!-- Include CSRF token manually -->
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
             <!-- Hidden input to pass 'type' argument -->
             <input type="hidden" name="type" value="{{ type }}">
 

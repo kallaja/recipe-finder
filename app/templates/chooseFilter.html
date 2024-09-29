@@ -8,6 +8,9 @@
     <div class="container main-container">
         <h1 class="my-3">Choose filter you want to apply.</h1>
         <form method="POST" action="">
+            <!-- Include CSRF token manually -->
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
             <div class="mb-3">
                 <select class="form-select" aria-label="Default select example" name="searching filter">
                   <option selected>Open this select menu</option>
@@ -19,4 +22,5 @@
             <button type="submit" class="btn btn-primary">Submit</button>
         </form>
     </div>
+
     {% endblock %}

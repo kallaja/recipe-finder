@@ -2,6 +2,8 @@ import sqlite3
 import json
 from .config import Config
 
+# DATABASE FOR STORING API RESPONSES ----------------------------------------------------------------------------------
+
 db_file = Config.db_file
 
 
@@ -17,7 +19,7 @@ def init_db():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL UNIQUE,
             json TEXT NOT NULL
-        ) 
+        )
     ''')
     connection.commit()
     # Close the database connection when operation done

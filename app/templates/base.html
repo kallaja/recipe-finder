@@ -25,8 +25,24 @@
         <li class="nav-item">
           <a class="nav-link active" aria-current="page" href="{{ url_for('main.choose_filter') }}">Filter recipes</a>
         </li>
+        <!-- Only show Login/Register if user is logged out. otherwise show "Log Out" -->
+        {% if not current_user.is_authenticated: %}
+        <li class="nav-item">
+          <a class="nav-link active" aria-current="page" href="{{ url_for('auth.login') }}">Log in</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" aria-current="page" href="{{ url_for('auth.register') }}">Register</a>
+        </li>
+        {% else: %}
+        <li class="nav-item">
+          <a class="nav-link active" aria-current="page" href="{{ url_for('auth.logout') }}">Log out</a>
+        </li>
+        {% endif %}
       </ul>
       <form class="d-flex" role="search" action="" method="post">
+        <!-- Include CSRF token manually -->
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
         <input class="form-control me-2" type="search" placeholder="Search for the recipe" aria-label="Search" name="search">
         <button class="btn btn-outline-success" type="submit">Search</button>
       </form>

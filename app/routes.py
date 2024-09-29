@@ -1,12 +1,23 @@
-from flask import render_template, request, redirect, url_for, Blueprint
+from flask import render_template, request, redirect, url_for, Blueprint, flash
 from .db import obtain_response_from_database, pass_response_to_database
+from .auth_db import register_check_if_user_exists, login_check_if_user_exists
 from .api import search_recipe, get_random_recipes
 import json
+from .forms import RegisterForm, LoginForm
+from flask_login import current_user, logout_user
+from . import login_manager
+from .models import User
 
 with open('data.json', 'r') as file:
     json_data = json.load(file)
 
 main_bp = Blueprint('main', __name__, template_folder='templates', static_folder='static')
+auth_bp = Blueprint('auth', __name__, template_folder='templates', static_folder='static')
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(user_id)
 
 
 # fetch dish details for the website dedicated to one recipe;
@@ -93,12 +104,25 @@ def choose_filter():
         return capture_searched_data()
     if request.method == 'POST' and 'searching filter' in request.form:
         # fetch data what option was selected in a form
-        searching_filter = request.form.get('searching filter')
-
-        if searching_filter:
-            return redirect(url_for('main.preferences', filter_type=searching_filter))
-
+        selected_filter = request.form.get('searching filter')
+        if selected_filter:
+            return redirect(url_for('main.preferences', filter_type=selected_filter))
     return render_template('chooseFilter.html')
+
+# @main_bp.route('/chooseFilter', methods=['GET', 'POST'])
+# def choose_filter():
+#     form = FilterForm()
+#
+#     if request.method == 'POST' and 'search' in request.form:
+#         # capture data from the "search" field in the navbar and manage it
+#         return capture_searched_data()
+#     elif form.validate_on_submit():
+#         selected_filter = form.searching_filter.data
+#
+#         if selected_filter:
+#             return redirect(url_for('main.preferences', filter_type=selected_filter))
+#
+#     return render_template('chooseFilter.html', form=form)
 
 
 @main_bp.route('/preferences', methods=['GET', 'POST'])
@@ -199,3 +223,53 @@ def error():
     # fetch "searched_phrase" after using redirect() function
     searched_phrase = request.args.get('dish_name')
     return render_template('error.html', searched_phrase=searched_phrase)
+
+
+# auth_bp -------------------------------------------------------------------------------------------------------------
+
+@auth_bp.route('/register', methods=['GET', 'POST'])
+def register():
+    register_form = RegisterForm()
+
+    if request.method == 'POST' and 'search' in request.form:
+        # capture data from the "search" field in the navbar and manage it
+        return capture_searched_data()
+    elif register_form.validate_on_submit():
+        # check if user with this email exists in the database, if no -> add
+        user_exists = register_check_if_user_exists(form=register_form)
+        if user_exists:
+            flash("You've already signed up with that email, log in instead!")
+            return redirect(url_for('auth.login'))
+        else:
+            return redirect(url_for("main.start"))
+
+    return render_template('register.html', form=register_form, current_user=current_user)
+
+
+@auth_bp.route('/login', methods=["GET", "POST"])
+def login():
+    login_form = LoginForm()
+
+    if request.method == 'POST' and 'search' in request.form:
+        # capture data from the "search" field in the navbar and manage it
+        return capture_searched_data()
+    elif login_form.validate_on_submit():
+        if_user_logged = login_check_if_user_exists(login_form)
+
+        if if_user_logged == 1:
+            flash("That email does not exist, please try again.")
+            return redirect(url_for('auth.login'))
+        # Password incorrect
+        elif if_user_logged == 2:
+            flash('Password incorrect, please try again.')
+            return redirect(url_for('auth.login'))
+        else:
+            return redirect(url_for('main.start'))
+
+    return render_template("login.html", form=login_form, current_user=current_user)
+
+
+@auth_bp.route('/logout', methods=['GET', 'POST'])
+def logout():
+    logout_user()
+    return redirect(url_for('main.start'))

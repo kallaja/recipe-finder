@@ -32,3 +32,15 @@ hr {
 .bg-img-3 {
     background-image: url('../images/vegetables.jpg');
 }
+
+.auth-header {
+    color: #212529;
+    text-align: center;
+    font-size: 3rem;
+    background-color: lightgrey;
+}
+
+.auth-block {
+    text-align: center;
+    font-size: 2.25rem;
+}

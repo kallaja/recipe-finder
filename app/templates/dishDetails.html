@@ -6,7 +6,31 @@
 
     {% block content %}
     <div class="container main-container py-3 my-3">
-        <h1>{{ dish_name }}</h1>
+        <div class="row">
+            <h1 class="col col-10">{{ dish_name }}</h1>
+<!--            <i id="icon" style="color: #dfaee6; font-size: 3.5em; text-align: center;" class="col col-2 pt-3 pr-3 fa-regular fa-heart fa-2xl"></i>-->
+              {% if current_user.is_authenticated %}
+                    {% if recipe_saved_by_user: %}
+                        <!-- Unsave Form -->
+                        <form class="col col-2 pt-3 pr-3" action="{{ url_for('main.unsave_recipe', dish_name=dish_name) }}" method="POST">
+                            <!-- Include CSRF token manually -->
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="icon-button saved" title="Unsave Recipe" style="background: rgba(0,0,0,0); border: none;">
+                                <i style="color: #dfaee6; font-size: 3.5em; text-align: center;" class="fa-solid fa-heart fa-2xl"></i> <!-- Solid Heart Icon -->
+                            </button>
+                        </form>
+                    {% else %}
+                        <!-- Save Form -->
+                        <form class="col col-2 pt-3 pr-3" action="{{ url_for('main.save_recipe', unique_name=unique_name, recipe_number=id_num) }}" method="POST">
+                            <!-- Include CSRF token manually -->
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="icon-button" title="Save Recipe" style="background: rgba(0,0,0,0); border: none;">
+                                <i style="color: #dfaee6; font-size: 3.5em; text-align: center;" class="fa-regular fa-heart fa-2xl"></i> <!-- Outline Heart Icon -->
+                            </button>
+                        </form>
+                    {% endif %}
+              {% endif %}
+        </div>
         <br>
         <div class="row">
             {% if dish_photo: %}
@@ -31,4 +55,9 @@
             {% endfor %}
         </ol>
     </div>
+    {% endblock %}
+
+    {% block scripts %}
+    {{ super() }}
+        <script src="https://kit.fontawesome.com/26cce81983.js" crossorigin="anonymous"></script>
     {% endblock %}

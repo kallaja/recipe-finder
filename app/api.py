@@ -6,8 +6,8 @@ with open('data.json', 'r') as file:
     json_data = json.load(file)
 
 
-def search_recipe(dish_name=None, user_intolerances=None, cuisine_type=None, diet_type=None):
-    # recipes searching endpoint
+def search_recipe(dish_name: str = None, user_intolerances: list[str] = None, cuisine_type: list[str] = None,
+                  diet_type: list[str] = None) -> requests.models.Response | int:
     endpoint = 'https://api.spoonacular.com/recipes/complexSearch'
 
     header = {'x-api-key': Config.API_KEY}
@@ -53,7 +53,7 @@ def search_recipe(dish_name=None, user_intolerances=None, cuisine_type=None, die
         return 1
 
 
-def get_random_recipes(num_recipes):
+def get_random_recipes(num_recipes: int) -> requests.models.Response | int:
     endpoint = 'https://api.spoonacular.com/recipes/random'
 
     header = {'x-api-key': Config.API_KEY}

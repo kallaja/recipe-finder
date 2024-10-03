@@ -9,7 +9,7 @@ from .extensions import sqlalchemy_db
 def add_user(email, password, name):
     # Create a new session
     session = sqlalchemy_db.session
-
+    # Hash a password with the given method and salt with a string of the given length
     hash_and_salted_password = generate_password_hash(
         password,
         method='pbkdf2:sha256',
@@ -22,7 +22,6 @@ def add_user(email, password, name):
     )
     session.add(new_user)
     session.commit()
-
     return new_user
 
 

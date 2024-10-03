@@ -1,13 +1,14 @@
 import sqlite3
 import json
 from .config import Config
+import requests
 
 # DATABASE FOR STORING API RESPONSES ----------------------------------------------------------------------------------
 
 db_file = Config.db_file
 
 
-def init_db():
+def init_db() -> None:
     # Connect to a .db file (or create it if it doesn't exist)
     connection = sqlite3.connect(db_file, check_same_thread=False)
     # Create a cursor to interact with the database
@@ -26,7 +27,7 @@ def init_db():
     connection.close()
 
 
-def pass_response_to_database(unique_name, new_json_data):
+def pass_response_to_database(unique_name: str, new_json_data: requests.models.Response | dict | list) -> None:
     # Connect to a .db file (or create it if it doesn't exist)
     connection = sqlite3.connect(db_file, check_same_thread=False)
     # Create a cursor to interact with the database
@@ -62,7 +63,7 @@ def pass_response_to_database(unique_name, new_json_data):
     connection.close()
 
 
-def obtain_response_from_database(unique_name):
+def obtain_response_from_database(unique_name: str) -> requests.models.Response | dict | list | None:
     # Connect to a .db file (or create it if it doesn't exist)
     connection = sqlite3.connect(db_file, check_same_thread=False)
     # Create a cursor to interact with the database

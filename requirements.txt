@@ -1,9 +1,15 @@
+Bootstrap-Flask==2.4.0
 Flask==3.0.3
 Bootstrap-Flask==2.4.0
 gunicorn==23.0.0
 Jinja2==3.1.4
+Flask-Login==0.6.3
+Flask-Session==0.8.0
+Flask-SQLAlchemy==3.1.1
+Flask-WTF==1.2.1
 requests==2.32.3
 selenium==4.24.0
+SQLAlchemy==2.0.35
 Werkzeug==3.0.4
 WTForms==3.1.2
 SQLAlchemy~=2.0.35
@@ -12,3 +18,7 @@ Flask-CKEditor==1.0.0
 Flask-Login==0.6.3
 Flask-SQLAlchemy==3.1.1
 Flask-WTF==1.2.1
+Flask-Session==0.8.0
+email_validator==2.2.0
+redis==5.1.0
+flask-talisman==1.1.0

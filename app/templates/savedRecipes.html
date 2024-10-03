@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+    {% block title %}
+    <title>Saved Recipes</title>
+    {% endblock %}
+
+    {% block styles %}
+    {{ super() }}
+    <style>
+        .card { width: 18rem; }
+    </style>
+    {% endblock %}
+
+    {% block content %}
+    <div class="container main-container">
+             <div class="cards justify-content-center row row-cols-1 row-cols-md-2 row-cols-lg-3 mb-2 py-5">
+                 {% for recipe in recipes: %}
+                 <div class="card col text-center m-2" style="width: 18rem;">
+                     {% if recipe.dish_photo: %}
+                      <img src="{{ recipe.dish_photo }}" class="card-img-top" alt="{{ recipe.dish_name }}">
+                     {% else: %}
+                     <img src="{{ url_for('main.static', filename='images/no-image-found.png') }}" class="card-img-top" alt="{{ recipe.dish_name }}" height="183.933" width="276.4">
+                     {% endif %}
+                      <div class="card-body justify-content-center">
+                        <h5 class="card-title">{{ recipe.dish_name }}</h5>
+                        <a href="{{ url_for('main.saved_dish_details', recipe_id=recipe.id) }}" class="btn btn-outline-primary">More details</a>
+                      </div>
+                </div>
+                {% endfor %}
+             </div>
+    </div>
+    {% endblock %}

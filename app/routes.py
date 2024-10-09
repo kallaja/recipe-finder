@@ -6,7 +6,8 @@ import json
 from .forms import RegisterForm, LoginForm
 from flask_login import current_user, logout_user, login_required
 from . import login_manager
-from .models import User, Recipe, sqlalchemy_db, is_recipe_saved_by_user
+from .models import (User, Recipe, sqlalchemy_db, is_recipe_saved_by_user, save_recipe_for_current_user,
+                     unsave_recipe_for_current_user)
 from werkzeug.wrappers import Response
 from typing import Tuple
 
@@ -21,11 +22,6 @@ auth_bp = Blueprint('auth', __name__, template_folder='templates', static_folder
 @main_bp.errorhandler(500)
 def internal_error(error):
     return render_template('error500.html'), 500
-
-
-@main_bp.route('/KeyError')
-def key_error():
-    return render_template('error500.html')
 
 
 @login_manager.user_loader
@@ -301,12 +297,9 @@ def save_recipe(unique_name=None, recipe_number=None, dish_name=None):
         recipe = Recipe.query.get_or_404(recipe_id)
         # Save recipe in current_user saved_recipes
         # Check if the recipe is already saved
-        if recipe in current_user.saved:
-            pass
-        else:
-            # Save recipe in current_user saved
-            current_user.saved.append(recipe)
-            sqlalchemy_db.session.commit()
+        if recipe not in current_user.saved:
+            # Save recipe in current user's saved
+            save_recipe_for_current_user(recipe)
         # Redirect back to the recipe page
         return redirect(request.referrer)
     elif unique_name and recipe_number:
@@ -328,10 +321,8 @@ def save_recipe(unique_name=None, recipe_number=None, dish_name=None):
 
             # Check if the recipe is already saved -- if not - Save recipe in current_user saved
             if recipe not in current_user.saved:
-                # Save recipe in current_user saved
-                current_user.saved.append(recipe)
-                sqlalchemy_db.session.commit()
-
+                # Save recipe in current user's saved
+                save_recipe_for_current_user(recipe)
             # Redirect back to the recipe page
             return redirect(request.referrer)
         else:
@@ -356,13 +347,10 @@ def unsave_recipe(dish_name):
         if recipe in current_user.saved:
             try:
                 # Remove the recipe from the user's saved recipes
-                current_user.saved.remove(recipe)
-                # Commit the changes to the database
-                sqlalchemy_db.session.commit()
+                unsave_recipe_for_current_user(recipe)
             except Exception:
                 # Rollback in case of any error
                 sqlalchemy_db.session.rollback()
-
         # Redirect back
         return redirect(request.referrer)
 

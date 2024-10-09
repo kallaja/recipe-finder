@@ -8,4 +8,5 @@ class Config:
     db_file = 'response.db'
     # flask app SECRET  KEY
     SECRET_KEY = os.getenv('SECRET_KEY')
+    WTF_CSRF_SECRET_KEY = os.getenv('WTF_CSRF_SECRET_KEY')
     SQLALCHEMY_DATABASE_URI = os.getenv('SQLALCHEMY_DATABASE_URI')

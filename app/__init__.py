@@ -1,5 +1,5 @@
 from .config import Config
-from flask import Flask, request
+from flask import Flask
 from .models import Base, User
 from .db import init_db
 from .extensions import login_manager, sqlalchemy_db, csrf, bootstrap
@@ -16,17 +16,18 @@ def create_app():
     # Create the Flask app
     app = Flask(__name__)
     app.config.update(
-        SESSION_TYPE='filesystem',
         SCM_DO_BUILD_DURING_DEPLOYMENT=1,
         SECRET_KEY=Config.SECRET_KEY,
-        WTF_CSRF_SECRET_KEY=Config.SECRET_KEY,
+        WTF_CSRF_SECRET_KEY=Config.WTF_CSRF_SECRET_KEY,
         SQLALCHEMY_DATABASE_URI=Config.SQLALCHEMY_DATABASE_URI,
     )
-    # app.config['SESSION_COOKIE_SECURE'] = True  # Ensures cookies are sent over HTTPS
-    app.config["SESSION_COOKIE_SAMESITE"] = "strict"
+    app.config['SESSION_COOKIE_SECURE'] = True  # Ensures cookies are sent over HTTPS
     app.config["SESSION_COOKIE_HTTPONLY"] = True
     app.config["REMEMBER_COOKIE_SECURE"] = True
     app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # Mitigates CSRF attacks
+    app.config['SESSION_TYPE'] = 'filesystem'  # Use filesystem storage
+    app.config['SESSION_FILE_DIR'] = '/db/sessions'  # Set your session file path
+    app.config['SESSION_PERMANENT'] = False
 
     # Initialize the sqlite database for API responses
     init_db()

@@ -10,11 +10,22 @@ from .models import User, Recipe, sqlalchemy_db, is_recipe_saved_by_user
 from werkzeug.wrappers import Response
 from typing import Tuple
 
+# scrapped data about available intolerances, types of diets and types of cuisines to choose
 with open('data.json', 'r') as file:
     json_data = json.load(file)
 
 main_bp = Blueprint('main', __name__, template_folder='templates', static_folder='static')
 auth_bp = Blueprint('auth', __name__, template_folder='templates', static_folder='static')
+
+
+@main_bp.errorhandler(500)
+def internal_error(error):
+    return render_template('error500.html'), 500
+
+
+@main_bp.route('/KeyError')
+def key_error():
+    return render_template('error500.html')
 
 
 @login_manager.user_loader
@@ -52,7 +63,7 @@ def return_recipe_details(response: list, i: int, unique_name: str) \
 
 # fetch dish details for the website dedicated to one recipe;
 # "i" stands for number of recipe in response.json()['recipes']
-def fetch_dish_details_and_render_site(unique_name: str, i: int = 0) -> Response:
+def fetch_dish_details_and_render_site(unique_name: str, i: int = 0):
     # Retrieve the data from the database using unique name
     response = obtain_response_from_database(unique_name)
 
@@ -62,40 +73,17 @@ def fetch_dish_details_and_render_site(unique_name: str, i: int = 0) -> Response
         recipe_id = Recipe.get_id_by_name(dish_name)
         if recipe_id is not None:  # recipe saved in database
             recipe_saved_by_user = is_recipe_saved_by_user(recipe_id)
-            # obtain dish details straight from database
-            dish_name, dish_photo, instructions, ingredients = return_recipe_details(response, i, unique_name)
-            return render_template('dishDetails.html', dish_name=dish_name, dish_photo=dish_photo,
-                                   instructions=instructions, ingredients=ingredients,
-                                   unique_name=unique_name, id_num=i, recipe_saved_by_user=recipe_saved_by_user)
+            if i == 0:
+                print(0, recipe_saved_by_user)
         else:
             recipe_saved_by_user = False
-        # check if image available for this recipe
-        if 'image' in response[i].keys():
-            dish_photo = response[i]['image']
-        else:
-            dish_photo = None
+            if i == 0:
+                print(0, recipe_saved_by_user)
 
-        instructions = []
-        if len(response[i]['analyzedInstructions']) > 0:
-            for instruction in response[i]['analyzedInstructions'][0]['steps']:
-                instructions.append(instruction)
-
-        if unique_name in ['2', '4']:
-            ingredients = []
-            for ingredient in response[i]['extendedIngredients']:
-                ingredients.append(ingredient['original'])
-            return render_template('dishDetails.html', dish_name=dish_name, dish_photo=dish_photo,
-                                   instructions=instructions, ingredients=ingredients,
-                                   unique_name=unique_name, id_num=i, recipe_saved_by_user=recipe_saved_by_user)
-        else:
-            ingredients = []
-            if len(response[i]['analyzedInstructions']) > 0:
-                for step in response[i]['analyzedInstructions'][0]['steps']:
-                    for ingredient in step['ingredients']:
-                        ingredients.append(ingredient['name'])
-            return render_template('dishDetails.html', dish_name=dish_name, dish_photo=dish_photo,
-                                   instructions=instructions, ingredients=ingredients,
-                                   unique_name=unique_name, id_num=i, recipe_saved_by_user=recipe_saved_by_user)
+        dish_name, dish_photo, instructions, ingredients = return_recipe_details(response, i, unique_name)
+        return render_template('dishDetails.html', dish_name=dish_name, dish_photo=dish_photo,
+                               instructions=instructions, ingredients=ingredients,
+                               unique_name=unique_name, id_num=i, recipe_saved_by_user=recipe_saved_by_user)
     else:
         return redirect(url_for('main.error'))
 
@@ -117,6 +105,8 @@ def capture_searched_data() -> Response:
         return redirect(url_for('main.searching_results', unique_name=unique_name))
     else:
         return redirect(url_for('main.error', dish_name=searched_dish_name))
+
+# MAIN_BP ------------------------------------------------------------------------------------------------------------
 
 
 @main_bp.route("/", methods=['GET', 'POST'])
@@ -304,7 +294,7 @@ def save_recipe(unique_name=None, recipe_number=None, dish_name=None):
         # capture data from the "search" field in the navbar and manage it
         return capture_searched_data()
 
-    # if recipe_number is None --> recipe is saved in database (Recipe) -- redirect from savedDishDetails.html
+    # if recipe_number is None --> recipe is already saved in database (Recipe) -- redirected from savedDishDetails.html
     if recipe_number is None and unique_name is None and dish_name:
         # Retrieve dish details straight from database - Recipe
         recipe_id = Recipe.get_id_by_name(dish_name)
@@ -312,12 +302,11 @@ def save_recipe(unique_name=None, recipe_number=None, dish_name=None):
         # Save recipe in current_user saved_recipes
         # Check if the recipe is already saved
         if recipe in current_user.saved:
-            flash('Recipe already saved.', 'info')
+            pass
         else:
             # Save recipe in current_user saved
             current_user.saved.append(recipe)
             sqlalchemy_db.session.commit()
-            flash('Recipe saved successfully!', 'success')
         # Redirect back to the recipe page
         return redirect(request.referrer)
     elif unique_name and recipe_number:
@@ -337,22 +326,17 @@ def save_recipe(unique_name=None, recipe_number=None, dish_name=None):
             # Retrieve the recipe by ID
             recipe = Recipe.query.get_or_404(recipe_id)
 
-            # Check if the recipe is already saved
-            if recipe in current_user.saved:
-                flash('Recipe already saved.', 'info')
-            else:
+            # Check if the recipe is already saved -- if not - Save recipe in current_user saved
+            if recipe not in current_user.saved:
                 # Save recipe in current_user saved
                 current_user.saved.append(recipe)
                 sqlalchemy_db.session.commit()
-                flash('Recipe saved successfully!', 'success')
 
             # Redirect back to the recipe page
             return redirect(request.referrer)
         else:
-            flash('Recipe not found.')
             return redirect(request.referrer)
     else:
-        flash('Recipe not found.')
         return redirect(request.referrer)
 
 
@@ -375,12 +359,9 @@ def unsave_recipe(dish_name):
                 current_user.saved.remove(recipe)
                 # Commit the changes to the database
                 sqlalchemy_db.session.commit()
-            except Exception as e:
+            except Exception:
                 # Rollback in case of any error
                 sqlalchemy_db.session.rollback()
-                flash('An error occurred while removing the recipe.', 'danger')
-        else:
-            flash('Recipe not found in your saved recipes.', 'warning')
 
         # Redirect back
         return redirect(request.referrer)
@@ -409,7 +390,6 @@ def saved_dish_details(recipe_id):
         return render_template('savedDishDetails.html', dish_name=dish_name, dish_photo=dish_photo,
                                instructions=instructions, ingredients=ingredients)
     else:
-        flash("Can't find this recipe.")
         return redirect(url_for('main.saved_recipes'))
 
 

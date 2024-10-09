@@ -1,6 +1,7 @@
 from .config import Config
 import requests
 import json
+from werkzeug.exceptions import InternalServerError
 
 with open('data.json', 'r') as file:
     json_data = json.load(file)
@@ -47,10 +48,13 @@ def search_recipe(dish_name: str = None, user_intolerances: list[str] = None, cu
     response = requests.get(url=endpoint, headers=header, params=data)
 
     # return response if the dishes were found or 1 when no dish found
-    if len(response.json()['results']) > 0:
-        return response
-    else:
-        return 1
+    try:
+        if len(response.json()['results']) > 0:
+            return response
+        else:
+            return 1
+    except KeyError:
+        raise InternalServerError("Key 'results' is missing")
 
 
 def get_random_recipes(num_recipes: int) -> requests.models.Response | int:
@@ -62,7 +66,10 @@ def get_random_recipes(num_recipes: int) -> requests.models.Response | int:
     response = requests.get(url=endpoint, headers=header, params=data)
 
     # check if the dish the user was looking for has been found
-    if len(response.json()['recipes']) > 0:
-        return response
-    else:
-        return 1
+    try:
+        if len(response.json()['recipes']) > 0:
+            return response
+        else:
+            return 1
+    except KeyError:
+        raise InternalServerError("Key 'recipes' is missing")

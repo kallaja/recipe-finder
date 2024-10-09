@@ -48,7 +48,7 @@ class Recipe(sqlalchemy_db.Model):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     dish_name: Mapped[String] = mapped_column(String, nullable=False, unique=True)
-    dish_photo: Mapped[String] = mapped_column(String, nullable=False)
+    dish_photo: Mapped[String] = mapped_column(String, nullable=True)
     instructions: Mapped[JSON] = mapped_column(JSON, nullable=False)
     ingredients: Mapped[JSON] = mapped_column(JSON, nullable=False)
 

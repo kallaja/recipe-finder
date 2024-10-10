@@ -3,7 +3,7 @@ import requests
 import json
 from werkzeug.exceptions import InternalServerError
 
-with open('data.json', 'r') as file:
+with open('../data.json', 'r') as file:
     json_data = json.load(file)
 
 

@@ -9,7 +9,7 @@ from flask_session import Session
 login_manager.login_view = 'auth.login'  # Redirect to 'auth.login' when login is required
 login_manager.login_message_category = 'info'
 
-db_file = Config.db_file
+db_file = Config.response_db_file
 
 
 def create_app():
@@ -26,7 +26,7 @@ def create_app():
     app.config["REMEMBER_COOKIE_SECURE"] = True
     app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # Mitigates CSRF attacks
     app.config['SESSION_TYPE'] = 'filesystem'  # Use filesystem storage
-    app.config['SESSION_FILE_DIR'] = '/db/sessions'  # Set your session file path
+    app.config['SESSION_FILE_DIR'] = Config.SESSION_FILE_DIR  # Set your session file path
     app.config['SESSION_PERMANENT'] = False
 
     # Initialize the sqlite database for API responses

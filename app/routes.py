@@ -12,7 +12,7 @@ from werkzeug.wrappers import Response
 from typing import Tuple
 
 # scrapped data about available intolerances, types of diets and types of cuisines to choose
-with open('data.json', 'r') as file:
+with open('../data.json', 'r') as file:
     json_data = json.load(file)
 
 main_bp = Blueprint('main', __name__, template_folder='templates', static_folder='static')
@@ -43,6 +43,7 @@ def return_recipe_details(response: list, i: int, unique_name: str) \
         for instruction in response[i]['analyzedInstructions'][0]['steps']:
             instructions.append(instruction)
 
+    # different responses for different searching endpoints
     if unique_name in ['2', '4']:
         ingredients = []
         for ingredient in response[i]['extendedIngredients']:
@@ -69,12 +70,8 @@ def fetch_dish_details_and_render_site(unique_name: str, i: int = 0):
         recipe_id = Recipe.get_id_by_name(dish_name)
         if recipe_id is not None:  # recipe saved in database
             recipe_saved_by_user = is_recipe_saved_by_user(recipe_id)
-            if i == 0:
-                print(0, recipe_saved_by_user)
         else:
             recipe_saved_by_user = False
-            if i == 0:
-                print(0, recipe_saved_by_user)
 
         dish_name, dish_photo, instructions, ingredients = return_recipe_details(response, i, unique_name)
         return render_template('dishDetails.html', dish_name=dish_name, dish_photo=dish_photo,
@@ -95,7 +92,6 @@ def capture_searched_data() -> Response:
         # Store response in database, using a unique key
         unique_name = '1'
         new_json_data = response.json()['results']
-        print(new_json_data)
         pass_response_to_database(unique_name, new_json_data)
         # redirect to a page with a list of recipes matching the searched term
         return redirect(url_for('main.searching_results', unique_name=unique_name))
@@ -302,16 +298,18 @@ def save_recipe(unique_name=None, recipe_number=None, dish_name=None):
             save_recipe_for_current_user(recipe)
         # Redirect back to the recipe page
         return redirect(request.referrer)
-    elif unique_name and recipe_number:
+    # recipe can be or not saved in database (Recipe)
+    elif (unique_name and recipe_number) or unique_name:  # recipe number can be a zero (0)
         # Retrieve the data from the database using unique name
         response_results = obtain_response_from_database(unique_name)
 
         if response_results is not None:
             dish_name, dish_photo, instructions, ingredients = (
                 return_recipe_details(response=response_results, i=recipe_number, unique_name=unique_name))
+            # look for this dish in the database (Recipe)
             recipe_id = Recipe.get_id_by_name(dish_name)
             if recipe_id is None:
-                # if no: add recipe with this recipe_name to database
+                # no dish with this name found in the database -- add recipe with this recipe_name to database
                 new_recipe = Recipe.add_new_recipe(dish_name=dish_name, dish_photo=dish_photo,
                                                    instructions=json.dumps(instructions),
                                                    ingredients=json.dumps(ingredients))
@@ -319,7 +317,7 @@ def save_recipe(unique_name=None, recipe_number=None, dish_name=None):
             # Retrieve the recipe by ID
             recipe = Recipe.query.get_or_404(recipe_id)
 
-            # Check if the recipe is already saved -- if not - Save recipe in current_user saved
+            # Check if the recipe is already saved in current user's saved -- if not - save it there
             if recipe not in current_user.saved:
                 # Save recipe in current user's saved
                 save_recipe_for_current_user(recipe)

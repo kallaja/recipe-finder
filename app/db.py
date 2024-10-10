@@ -5,7 +5,7 @@ import requests
 
 # DATABASE FOR STORING API RESPONSES ----------------------------------------------------------------------------------
 
-db_file = Config.db_file
+db_file = Config.response_db_file
 
 
 def init_db() -> None:

@@ -12,7 +12,7 @@ from werkzeug.wrappers import Response
 from typing import Tuple
 
 # scrapped data about available intolerances, types of diets and types of cuisines to choose
-with open('../data.json', 'r') as file:
+with open('data.json', 'r') as file:
     json_data = json.load(file)
 
 main_bp = Blueprint('main', __name__, template_folder='templates', static_folder='static')

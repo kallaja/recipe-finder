@@ -25,7 +25,7 @@ def create_app():
     app.config["SESSION_COOKIE_HTTPONLY"] = True
     app.config["REMEMBER_COOKIE_SECURE"] = True
     app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # Mitigates CSRF attacks
-    app.config['SESSION_TYPE'] = 'filesystem'  # Use filesystem storage
+    app.config['SESSION_TYPE'] = 'sqlalchemy'
     app.config['SESSION_FILE_DIR'] = Config.SESSION_FILE_DIR  # Set your session file path
     app.config['SESSION_PERMANENT'] = False
 

@@ -1,7 +1,7 @@
 from .config import Config
 from flask import Flask
 from .models import Base, User
-from .db import init_db
+from .db_api_responses import init_db
 from .extensions import login_manager, sqlalchemy_db, csrf, bootstrap
 from flask_session import Session
 

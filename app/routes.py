@@ -1,5 +1,5 @@
 from flask import render_template, request, redirect, url_for, Blueprint, flash
-from .db import obtain_response_from_database, pass_response_to_database
+from .db_api_responses import obtain_response_from_database, pass_response_to_database
 from .auth_db import register_check_if_user_exists, login_check_if_user_exists
 from .api import search_recipe, get_random_recipes
 import json

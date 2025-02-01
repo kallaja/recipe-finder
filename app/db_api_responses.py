@@ -23,7 +23,6 @@ def init_db() -> None:
         )
     ''')
     connection.commit()
-    # Close the database connection when operation done
     connection.close()
 
 
@@ -59,7 +58,6 @@ def pass_response_to_database(unique_name: str, new_json_data: requests.models.R
                     VALUES (?, ?)
                 ''', (unique_name, json.dumps(new_json_data)))
     connection.commit()
-    # Close the database connection when operation done
     connection.close()
 
 
@@ -75,7 +73,6 @@ def obtain_response_from_database(unique_name: str) -> requests.models.Response 
                       WHERE name = ?''', (unique_name,))
     rows = cursor.fetchall()
     connection.commit()
-    # Close the database connection when operation done
     connection.close()
 
     if rows:

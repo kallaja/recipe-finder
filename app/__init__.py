@@ -26,7 +26,7 @@ def create_app():
     app.config["REMEMBER_COOKIE_SECURE"] = True
     app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # Mitigates CSRF attacks
     app.config['SESSION_TYPE'] = 'sqlalchemy'
-    app.config['SESSION_FILE_DIR'] = Config.SESSION_FILE_DIR  # Set your session file path
+    app.config['SESSION_SQLALCHEMY'] = sqlalchemy_db
     app.config['SESSION_PERMANENT'] = False
 
     # Initialize the sqlite database for API responses

@@ -25,9 +25,12 @@ def add_user(email, password, name):
     return new_user
 
 
-# Check if user email is already present in the database.
-# return 1 - user with this email exists, return 0 - no user with this email
-def register_check_if_user_exists(form):
+def register_check_if_user_exists(form) -> int:
+    """
+    The function checks if user email is already present in the database.
+    :return:  1 - user with this email exists,
+        0 - no user with this email
+    """
     # Create a new session
     session = sqlalchemy_db.session
 
@@ -43,10 +46,12 @@ def register_check_if_user_exists(form):
     return 0
 
 
-# return 1 - user with this email doesn't exist
-# return 2 - password incorrect (but user with this email exists)
-# return 0 - email and password correct - user logged
-def login_check_if_user_exists(form):
+def login_check_if_user_exists(form) -> int:
+    """
+    :return: 1 - user with this email doesn't exist,
+        2 - password incorrect (but user with this email exists),
+        0 - email and password correct (user logged)
+    """
     # Create a new session
     session = sqlalchemy_db.session
 

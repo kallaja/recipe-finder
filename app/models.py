@@ -20,7 +20,7 @@ saved_recipes = Table(
 )
 
 
-# Create a User table for all your registered users
+# Create a User table for all registered users
 class User(UserMixin, sqlalchemy_db.Model):
     __tablename__ = "users"
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
@@ -37,7 +37,7 @@ class User(UserMixin, sqlalchemy_db.Model):
     )
 
     def __init__(self, email, password, name):
-        super().__init__()  # Initialize UserMixin
+        super().__init__()
         self.email = email
         self.password = password
         self.name = name
@@ -60,16 +60,20 @@ class Recipe(sqlalchemy_db.Model):
         lazy='dynamic'
     )
 
-    # Class method to get recipe ID by title
     @classmethod
     def get_id_by_name(cls, name: str) -> int | None:
+        """
+        Class method to get recipe ID by title.
+        """
         recipe = cls.query.filter_by(dish_name=name).first()
         return recipe.id if recipe else None
 
-    # Class method to add a new recipe
     @classmethod
     def add_new_recipe(cls, dish_name: str, dish_photo: str, instructions: JSON | str, ingredients: JSON | str) \
             -> 'Recipe':
+        """
+        Class method to add a new recipe.
+        """
         # Create a new recipe object
         new_recipe = cls(
             dish_name=dish_name,
@@ -94,16 +98,20 @@ def is_recipe_saved_by_user(recipe_id: int) -> bool:
     return False  # Recipe is not saved by the current user
 
 
-# add a recipe to the current user's saved recipes
 def save_recipe_for_current_user(recipe: 'Recipe') -> None:
+    """
+    The function adds a recipe to the current user's saved recipes
+    """
     # Check if the recipe is already saved by the current user
     if not current_user.saved.filter_by(id=recipe.id).first():
         current_user.saved.append(recipe)  # Add the recipe to current_user.saved
         sqlalchemy_db.session.commit()  # Commit the changes to the database
 
 
-# remove a recipe from the current user's saved recipes
 def unsave_recipe_for_current_user(recipe: 'Recipe') -> None:
+    """
+    The function removes a recipe from the current user's saved recipes
+    """
     # Check if the recipe is in the user's saved recipes
     if current_user.saved.filter_by(id=recipe.id).first():
         current_user.saved.remove(recipe)  # Remove the recipe from the current user's saved list

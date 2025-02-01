@@ -2,15 +2,18 @@ import sqlite3
 import json
 from .config import Config
 import requests
+import os
 
 # DATABASE FOR STORING API RESPONSES ----------------------------------------------------------------------------------
 
 db_file = Config.response_db_file
+os.makedirs("instance", exist_ok=True)
+db_path = os.path.join("instance", db_file)
 
 
 def init_db() -> None:
     # Connect to a .db file (or create it if it doesn't exist)
-    connection = sqlite3.connect(db_file, check_same_thread=False)
+    connection = sqlite3.connect(db_path, check_same_thread=False)
     # Create a cursor to interact with the database
     cursor = connection.cursor()
 
@@ -28,7 +31,7 @@ def init_db() -> None:
 
 def pass_response_to_database(unique_name: str, new_json_data: requests.models.Response | dict | list) -> None:
     # Connect to a .db file (or create it if it doesn't exist)
-    connection = sqlite3.connect(db_file, check_same_thread=False)
+    connection = sqlite3.connect(db_path, check_same_thread=False)
     # Create a cursor to interact with the database
     cursor = connection.cursor()
     # Query the database to check if record with this unique key exists
@@ -63,7 +66,7 @@ def pass_response_to_database(unique_name: str, new_json_data: requests.models.R
 
 def obtain_response_from_database(unique_name: str) -> requests.models.Response | dict | list | None:
     # Connect to a .db file (or create it if it doesn't exist)
-    connection = sqlite3.connect(db_file, check_same_thread=False)
+    connection = sqlite3.connect(db_path, check_same_thread=False)
     # Create a cursor to interact with the database
     cursor = connection.cursor()
 

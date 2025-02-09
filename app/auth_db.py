@@ -2,69 +2,69 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user
 from .models import User
 from .extensions import sqlalchemy_db
+from sqlalchemy.exc import IntegrityError
 
-# DATABASE FOR AUTHORIZING USERS ------------------------------------
 
-
-def add_user(email, password, name):
-    # Create a new session
+def add_user(email, password, name) -> User | None:
+    """Creates a new user and stores it in the database."""
     session = sqlalchemy_db.session
-    # Hash a password with the given method and salt with a string of the given length
-    hash_and_salted_password = generate_password_hash(
-        password,
-        method='pbkdf2:sha256',
-        salt_length=8
-    )
-    new_user = User(
-        email=email,
-        name=name,
-        password=hash_and_salted_password
-    )
-    session.add(new_user)
-    session.commit()
-    return new_user
+    try:
+        hash_and_salted_password = generate_password_hash(
+            password,
+            method='pbkdf2:sha256',
+            salt_length=8
+        )
+        new_user = User(
+            email=email,
+            name=name,
+            password=hash_and_salted_password
+        )
+        session.add(new_user)
+        session.commit()
+        return new_user
+    except IntegrityError:
+        session.rollback()
+        print(f"Error: User with email {email} already exists.")
+        return None
+    except Exception as e:
+        session.rollback()
+        print(f"Unexpected error: {e}")
+        return None
 
 
 def register_check_if_user_exists(form) -> int:
     """
-    The function checks if user email is already present in the database.
-    :return:  1 - user with this email exists,
-        0 - no user with this email
+    Adds a new user if no user with this email address already exists.
+    :return:  1 - User already exists,
+        0 - User does not exist and is registered successfully
+        2 - User does not exist and registration has failed
     """
-    # Create a new session
     session = sqlalchemy_db.session
-
     result = session.execute(sqlalchemy_db.select(User).where(User.email == form.email.data))
     user = result.scalar()
-    if user:
-        # User already exists
-        return 1
 
+    if user:
+        return 1
     new_user = add_user(email=form.email.data, password=form.password.data, name=form.name.data)
-    # This line will authenticate the user with Flask-Login
-    login_user(new_user)
-    return 0
+    if new_user:
+        login_user(new_user)
+        return 0
+    return 2
 
 
 def login_check_if_user_exists(form) -> int:
     """
+    Logs the user in if both email and password are correct.
     :return: 1 - user with this email doesn't exist,
         2 - password incorrect (but user with this email exists),
-        0 - email and password correct (user logged)
+        0 - email and password correct - successful login
     """
-    # Create a new session
     session = sqlalchemy_db.session
-
-    # check if user with this email exists in database
     result = session.execute(sqlalchemy_db.select(User).where(User.email == form.email.data))
-    # Note, email in db is unique so will only have one result.
     user = result.scalar()
-    # Email doesn't exist
     if not user:
         return 1
-    # Password incorrect
     elif not check_password_hash(user.password, form.password.data):
         return 2
-    else:
-        login_user(user)
-        return 0
+    login_user(user)
+    return 0

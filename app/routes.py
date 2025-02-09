@@ -11,7 +11,6 @@ from .models import (User, Recipe, sqlalchemy_db, is_recipe_saved_by_user, save_
 from werkzeug.wrappers import Response
 from typing import Tuple
 
-# scrapped data about available intolerances, types of diets and types of cuisines to choose
 with open('data.json', 'r') as file:
     json_data = json.load(file)
 
@@ -31,6 +30,10 @@ def load_user(user_id):
 
 def return_recipe_details(response: list, i: int, unique_name: str) \
         -> Tuple[str, str, list, list]:
+    """
+    Returns recipe details.
+    :return: dish_name, dish_photo, instructions, ingredients
+    """
     dish_name = response[i]['title']
     # check if image available for this recipe
     if 'image' in response[i].keys():
@@ -43,7 +46,7 @@ def return_recipe_details(response: list, i: int, unique_name: str) \
         for instruction in response[i]['analyzedInstructions'][0]['steps']:
             instructions.append(instruction)
 
-    # different responses for different searching endpoints
+    # different responses for different spoonacular searching endpoints
     if unique_name in ['2', '4']:
         ingredients = []
         for ingredient in response[i]['extendedIngredients']:
@@ -58,15 +61,15 @@ def return_recipe_details(response: list, i: int, unique_name: str) \
         return dish_name, dish_photo, instructions, ingredients
 
 
-# fetch dish details for the website dedicated to one recipe;
-# "i" stands for number of recipe in response.json()['recipes']
 def fetch_dish_details_and_render_site(unique_name: str, i: int = 0):
-    # Retrieve the data from the database using unique name
+    """
+    Fetches dish details for the website dedicated to one recipe.
+    :param: i: number of recipe in response.json()['recipes']
+    """
     response = obtain_response_from_database(unique_name)
 
     if response is not None:
         dish_name = response[i]['title']
-        # retrieve recipe id from database (if exists)
         recipe_id = Recipe.get_id_by_name(dish_name)
         if recipe_id is not None:  # recipe saved in database
             recipe_saved_by_user = is_recipe_saved_by_user(recipe_id)
@@ -81,13 +84,11 @@ def fetch_dish_details_and_render_site(unique_name: str, i: int = 0):
         return redirect(url_for('main.error'))
 
 
-# capture data from the "search" field in the navbar and manage it
 def capture_searched_data() -> Response:
+    """Captures data from the "search" field in the navbar and manage it."""
     searched_dish_name = request.form.get('search')
 
-    # look for the dish name entered in navbar search field
     response = search_recipe(dish_name=searched_dish_name)
-    # if the dishes were found
     if response != 1:
         # Store response in database, using a unique key
         unique_name = '1'
@@ -152,7 +153,6 @@ def preferences():
         else:
             response = search_recipe(diet_type=preferences_checked)
 
-        # if the dishes were found
         if response != '1':
             # Store response in database, using a unique key
             unique_name = '3'
@@ -237,16 +237,19 @@ def register():
     register_form = RegisterForm()
 
     if request.method == 'POST' and 'search' in request.form:
-        # capture data from the "search" field in the navbar and manage it
         return capture_searched_data()
+
     elif register_form.validate_on_submit():
         # check if user with this email exists in the database, if no -> add
         user_exists = register_check_if_user_exists(form=register_form)
-        if user_exists:
+        if user_exists == 1:
             flash("You've already signed up with that email, log in instead!")
             return redirect(url_for('auth.login'))
-        else:
+        elif user_exists == 0:
             return redirect(url_for("main.start"))
+        elif user_exists == 2:
+            flash("Registration failed, please try again.")
+            return redirect(url_for("auth.register"))
     return render_template('register.html', form=register_form, current_user=current_user)
 
 
@@ -255,8 +258,8 @@ def login():
     login_form = LoginForm()
 
     if request.method == 'POST' and 'search' in request.form:
-        # capture data from the "search" field in the navbar and manage it
         return capture_searched_data()
+
     elif login_form.validate_on_submit():
         if_user_logged = login_check_if_user_exists(login_form)
 
@@ -283,7 +286,6 @@ def logout():
 @login_required
 def save_recipe(unique_name=None, recipe_number=None, dish_name=None):
     if request.method == 'POST' and 'search' in request.form:
-        # capture data from the "search" field in the navbar and manage it
         return capture_searched_data()
 
     # if recipe_number is None --> recipe is already saved in database (Recipe) -- redirected from savedDishDetails.html
@@ -333,8 +335,8 @@ def save_recipe(unique_name=None, recipe_number=None, dish_name=None):
 @login_required
 def unsave_recipe(dish_name):
     if request.method == 'POST' and 'search' in request.form:
-        # capture data from the "search" field in the navbar and manage it
         return capture_searched_data()
+
     # recipe was saved by someone, so it is in database for sure
     if dish_name:
         recipe_id = Recipe.get_id_by_name(dish_name)
@@ -357,7 +359,6 @@ def unsave_recipe(dish_name):
 @login_required
 def saved_dish_details(recipe_id):
     if request.method == 'POST' and 'search' in request.form:
-        # capture data from the "search" field in the navbar and manage it
         return capture_searched_data()
 
     # Query to check if the recipe is in the current user's saved recipes
@@ -382,11 +383,9 @@ def saved_dish_details(recipe_id):
 @main_bp.route('/savedRecipes', methods=['GET', 'POST'])
 @login_required
 def saved_recipes():
+    """Renders a page with recipes saved by the user."""
     if request.method == 'POST' and 'search' in request.form:
-        # capture data from the "search" field in the navbar and manage it
         return capture_searched_data()
 
-    # Retrieve all saved recipes for the currently logged-in user
     users_saved_recipes = current_user.saved.all()
-    # pass this list as an argument to render site
     return render_template('savedRecipes.html', recipes=users_saved_recipes)

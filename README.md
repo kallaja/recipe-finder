@@ -21,7 +21,7 @@ The app uses spoonacular (https://spoonacular.com/food-api) to download recipes.
 
 ## 🛠️ TECHNOLOGIES
 The project uses the following technologies:  
-Backend: Python, Flask, Flask-Login, Flask-WTF  
+Backend: Python, Flask, Flask-Login, Flask-WTF, Werkzeug  
 Frontend: HTML, CSS, Flask-Bootstrap, Jinja  
 Database: SQLite + SQLAlchemy (ORM)  
 Others: Selenium, Requests, Gunicorn

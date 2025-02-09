@@ -4,6 +4,7 @@ from flask_login import UserMixin, current_user
 
 
 class Base(DeclarativeBase):
+    """Base class for SQLAlchemy models."""
     pass
 
 
@@ -20,8 +21,8 @@ saved_recipes = Table(
 )
 
 
-# Create a User table for all registered users
 class User(UserMixin, sqlalchemy_db.Model):
+    """User model for storing user-related data."""
     __tablename__ = "users"
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     email: Mapped[str] = mapped_column(String(100), unique=True)
@@ -44,6 +45,7 @@ class User(UserMixin, sqlalchemy_db.Model):
 
 
 class Recipe(sqlalchemy_db.Model):
+    """Recipe model representing a saved recipe."""
     __tablename__ = 'recipes'
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
@@ -62,57 +64,43 @@ class Recipe(sqlalchemy_db.Model):
 
     @classmethod
     def get_id_by_name(cls, name: str) -> int | None:
-        """
-        Class method to get recipe ID by title.
-        """
+        """Retrieves recipe id from database by name (if exists)."""
         recipe = cls.query.filter_by(dish_name=name).first()
         return recipe.id if recipe else None
 
     @classmethod
     def add_new_recipe(cls, dish_name: str, dish_photo: str, instructions: JSON | str, ingredients: JSON | str) \
             -> 'Recipe':
-        """
-        Class method to add a new recipe.
-        """
-        # Create a new recipe object
+        """Adds a new recipe to the database."""
         new_recipe = cls(
             dish_name=dish_name,
             dish_photo=dish_photo,
             instructions=instructions,
             ingredients=ingredients,
         )
-        # Add the new recipe to the session
         sqlalchemy_db.session.add(new_recipe)
-        sqlalchemy_db.session.commit()  # Commit the session to save the new recipe in the database
+        sqlalchemy_db.session.commit()
         return new_recipe
 
 
-# functions -------------------------------------------------------------------------------------------------------
 def is_recipe_saved_by_user(recipe_id: int) -> bool:
-    # Query the saved recipes of the current user to check if the recipe with the given id exists there
-    saved_recipe = current_user.saved.filter_by(id=recipe_id).first()
-
-    # Check if the recipe exists in the current_user.saved
-    if saved_recipe:
-        return True  # Recipe is saved by the current user
-    return False  # Recipe is not saved by the current user
+    """
+    Checks if the recipe is saved by the current user.
+    :return: True: recipe is saved by the current user,
+        False: recipe isn't saved by the current user
+    """
+    return bool(current_user.saved.filter_by(id=recipe_id).first())
 
 
 def save_recipe_for_current_user(recipe: 'Recipe') -> None:
-    """
-    The function adds a recipe to the current user's saved recipes
-    """
-    # Check if the recipe is already saved by the current user
+    """Adds a recipe to the current user's saved recipes."""
     if not current_user.saved.filter_by(id=recipe.id).first():
-        current_user.saved.append(recipe)  # Add the recipe to current_user.saved
-        sqlalchemy_db.session.commit()  # Commit the changes to the database
+        current_user.saved.append(recipe)
+        sqlalchemy_db.session.commit()
 
 
 def unsave_recipe_for_current_user(recipe: 'Recipe') -> None:
-    """
-    The function removes a recipe from the current user's saved recipes
-    """
-    # Check if the recipe is in the user's saved recipes
+    """Removes a recipe from the current user's saved recipes."""
     if current_user.saved.filter_by(id=recipe.id).first():
-        current_user.saved.remove(recipe)  # Remove the recipe from the current user's saved list
-        sqlalchemy_db.session.commit()  # Commit changes to the database
+        current_user.saved.remove(recipe)
+        sqlalchemy_db.session.commit()

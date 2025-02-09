@@ -31,7 +31,7 @@ def load_user(user_id):
 def return_recipe_details(response: list, i: int, unique_name: str) \
         -> Tuple[str, str, list, list]:
     """
-    Returns recipe details.
+    Extracts recipe details from the API response.
     :return: dish_name, dish_photo, instructions, ingredients
     """
     dish_name = response[i]['title']
@@ -63,8 +63,9 @@ def return_recipe_details(response: list, i: int, unique_name: str) \
 
 def fetch_dish_details_and_render_site(unique_name: str, i: int = 0):
     """
-    Fetches dish details for the website dedicated to one recipe.
-    :param: i: number of recipe in response.json()['recipes']
+    Fetches dish details from the database and renders the details page.
+    Returns:
+        i: number of recipe in response.json()['recipes']
     """
     response = obtain_response_from_database(unique_name)
 
@@ -90,7 +91,6 @@ def capture_searched_data() -> Response:
 
     response = search_recipe(dish_name=searched_dish_name)
     if response != 1:
-        # Store response in database, using a unique key
         unique_name = '1'
         new_json_data = response.json()['results']
         pass_response_to_database(unique_name, new_json_data)
@@ -104,14 +104,12 @@ def capture_searched_data() -> Response:
 
 @main_bp.route("/", methods=['GET', 'POST'])
 def start():
+    """Home page displaying random recipes."""
     if request.method == 'POST' and 'search' in request.form:
-        # capture data from the "search" field in the navbar and manage it
         return capture_searched_data()
     elif request.method == 'GET':
-        # obtain random recipes
         response = get_random_recipes(num_recipes=12)
 
-        # Store response in database, using a unique key
         unique_name = '2'
         new_json_data = response.json()['recipes']
         pass_response_to_database(unique_name, new_json_data)
@@ -124,10 +122,8 @@ def start():
 @main_bp.route('/chooseFilter', methods=['GET', 'POST'])
 def choose_filter():
     if request.method == 'POST' and 'search' in request.form:
-        # capture data from the "search" field in the navbar and manage it
         return capture_searched_data()
     if request.method == 'POST' and 'searching filter' in request.form:
-        # fetch data what option was selected in a form
         selected_filter = request.form.get('searching filter')
         if selected_filter:
             return redirect(url_for('main.preferences', filter_type=selected_filter))
@@ -137,12 +133,10 @@ def choose_filter():
 @main_bp.route('/preferences', methods=['GET', 'POST'])
 def preferences():
     if request.method == 'POST' and 'search' in request.form:
-        # capture data from the "search" field in the navbar and manage it
         return capture_searched_data()
     elif request.method == 'POST' and "checkBox" in request.form:
         preferences_checked = request.form.getlist('checkBox')
 
-        # Get the 'type' argument from the hidden input field
         type_value = request.form.get('type')
 
         # search for recipes, take filters into account
@@ -179,7 +173,6 @@ def preferences():
 @main_bp.route('/dishDetails/<int:id_num>/<unique_name>', methods=['GET', 'POST'])
 def details(id_num: int, unique_name: str):
     if request.method == 'POST' and 'search' in request.form:
-        # capture data from the "search" field in the navbar and manage it
         return capture_searched_data()
     return fetch_dish_details_and_render_site(unique_name=unique_name, i=id_num)
 
@@ -187,13 +180,9 @@ def details(id_num: int, unique_name: str):
 @main_bp.route('/random', methods=['GET', 'POST'])
 def random():
     if request.method == 'POST' and 'search' in request.form:
-        # capture data from the "search" field in the navbar and manage it
         return capture_searched_data()
-    # generate random recipe
     response = get_random_recipes(num_recipes=1)
-    # check if the dish the user was looking for has been found
     if response != 1:
-        # Store response in database, using a unique key
         unique_name = '4'
         new_json_data = response.json()['recipes']
         pass_response_to_database(unique_name, new_json_data)
@@ -203,10 +192,8 @@ def random():
 @main_bp.route('/searchingResults', methods=['GET', 'POST'])
 def searching_results():
     if request.method == 'POST' and 'search' in request.form:
-        # capture data from the "search" field in the navbar and manage it
         return capture_searched_data()
 
-    # Retrieve the data from the database using unique name
     unique_name = request.args.get('unique_name')
     response_results = obtain_response_from_database(unique_name)
 
@@ -223,7 +210,6 @@ def searching_results():
 @main_bp.route('/error', methods=['GET', 'POST'])
 def error():
     if request.method == 'POST' and 'search' in request.form:
-        # capture data from the "search" field in the navbar and manage it
         return capture_searched_data()
     # fetch "searched_phrase" after using redirect() function
     searched_phrase = request.args.get('dish_name')
@@ -234,13 +220,13 @@ def error():
 
 @auth_bp.route('/register', methods=['GET', 'POST'])
 def register():
+    """Handles user registration."""
     register_form = RegisterForm()
 
     if request.method == 'POST' and 'search' in request.form:
         return capture_searched_data()
 
     elif register_form.validate_on_submit():
-        # check if user with this email exists in the database, if no -> add
         user_exists = register_check_if_user_exists(form=register_form)
         if user_exists == 1:
             flash("You've already signed up with that email, log in instead!")
@@ -255,6 +241,7 @@ def register():
 
 @auth_bp.route('/login', methods=["GET", "POST"])
 def login():
+    """Handles user login."""
     login_form = LoginForm()
 
     if request.method == 'POST' and 'search' in request.form:
@@ -277,6 +264,7 @@ def login():
 
 @auth_bp.route('/logout', methods=['GET', 'POST'])
 def logout():
+    """Handles user logout."""
     logout_user()
     return redirect(url_for('main.start'))
 

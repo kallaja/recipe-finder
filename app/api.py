@@ -11,8 +11,7 @@ def search_recipe(dish_name: str = None, user_intolerances: list[str] = None, cu
                   diet_type: list[str] = None) -> requests.models.Response | int:
     """
     Queries the spoonacular API for the recipe, taking into account the user's preferences.
-    Returns:
-        requests.Response | int: API response if recipes are found, otherwise 1.
+    :return: requests.Response | int: API response if recipes are found, otherwise 1.
     """
     endpoint = 'https://api.spoonacular.com/recipes/complexSearch'
 
@@ -57,6 +56,7 @@ def search_recipe(dish_name: str = None, user_intolerances: list[str] = None, cu
 def get_random_recipes(num_recipes: int) -> requests.models.Response | int:
     """
     Fetches a given number of random recipes.
+
     Args:
         num_recipes (int): The number of random recipes to fetch.
     Returns:
